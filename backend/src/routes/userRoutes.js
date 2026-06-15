@@ -8,4 +8,20 @@ const {
 
 router.get("/", getUsers);
 
-module.exports = router;
+const verifyToken =
+require("../middleware/authMiddleware");
+
+router.get(
+  "/profile",
+  verifyToken,
+  (req, res) => {
+
+    res.json({
+      message: "Protected Route",
+      user: req.user
+    });
+
+  }
+);
+
+module.exports = router;
