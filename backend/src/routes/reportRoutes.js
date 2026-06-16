@@ -22,6 +22,9 @@ router.get("/settlements", getSettlementReport);
  *     summary: Dashboard Statistics
  *     tags:
  *       - Reports
+ *     responses:
+ *       200:
+ *         description: Dashboard data
  */
 router.get("/dashboard", getDashboardReport);
 
