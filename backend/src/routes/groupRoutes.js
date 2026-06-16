@@ -9,7 +9,11 @@ const {
   createGroup,
   getGroups,
   addMember,
-  removeMember
+  removeMember,
+  getGroupById,
+  getGroupMembers,
+  updateGroup,
+  deleteGroup
 } = require("../controllers/groupController");
 
 /**
@@ -111,5 +115,113 @@ router.delete(
   removeMember
 );
 
-module.exports = router;
-
+/**
+ * @swagger
+ * /api/groups/{groupId}:
+ *   get:
+ *     summary: Get Single Group
+ *     tags:
+ *       - Groups
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Group details
+ */
+router.get(
+  "/:groupId",
+  authMiddleware,
+  getGroupById
+);
+
+/**
+ * @swagger
+ * /api/groups/{groupId}/members:
+ *   get:
+ *     summary: Get Members Of Group
+ *     tags:
+ *       - Groups
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of members
+ */
+router.get(
+  "/:groupId/members",
+  authMiddleware,
+  getGroupMembers
+);
+
+/**
+ * @swagger
+ * /api/groups/{groupId}:
+ *   put:
+ *     summary: Update Group Name
+ *     tags:
+ *       - Groups
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               group_name:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Group updated
+ */
+router.put(
+  "/:groupId",
+  authMiddleware,
+  updateGroup
+);
+
+/**
+ * @swagger
+ * /api/groups/{groupId}:
+ *   delete:
+ *     summary: Delete Group
+ *     tags:
+ *       - Groups
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Group deleted
+ */
+router.delete(
+  "/:groupId",
+  authMiddleware,
+  deleteGroup
+);
+
+module.exports = router;
