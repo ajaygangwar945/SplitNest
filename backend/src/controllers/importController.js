@@ -216,6 +216,20 @@ const analyzeCSV = async (req, res) => {
               status,
               skip
             });
+
+            // --- Log Anomalies ---
+            if (issues.length > 0) {
+              issues.forEach(async (issue) => {
+                try {
+                  await pool.query(
+                    `INSERT INTO import_logs (anomaly_type, description, action_taken) VALUES ($1, $2, $3)`,
+                    ["ANOMALY", row.description || "Unknown row", issue]
+                  );
+                } catch (e) {
+                  console.error("Failed to log anomaly", e);
+                }
+              });
+            }
           }
 
           // --- 7. Duplicate Entries ---
