@@ -7,6 +7,7 @@ import Dashboard from "../pages/Dashboard";
 import Groups from "../pages/Groups";
 import GroupDetails from "../pages/GroupDetails";
 import Expenses from "../pages/Expenses";
+import Balances from "../pages/Balances";
 import ProtectedRoute from "../components/ProtectedRoute";
 
 function AppRoutes() {
@@ -50,6 +51,15 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <Expenses />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/balances"
+          element={
+            <ProtectedRoute>
+              <Balances />
             </ProtectedRoute>
           }
         />
