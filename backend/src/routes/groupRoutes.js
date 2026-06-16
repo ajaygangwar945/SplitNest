@@ -70,6 +70,24 @@ router.get(
  *       - Members
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               user_id:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Member Added
  */
 router.post(
   "/:groupId/member",

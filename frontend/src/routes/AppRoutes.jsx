@@ -4,6 +4,7 @@ import { Toaster } from "react-hot-toast";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
+import Groups from "../pages/Groups";
 import ProtectedRoute from "../components/ProtectedRoute";
 
 function AppRoutes() {
@@ -20,6 +21,15 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        
+        <Route
+          path="/groups"
+          element={
+            <ProtectedRoute>
+              <Groups />
             </ProtectedRoute>
           }
         />

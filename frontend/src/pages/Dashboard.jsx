@@ -1,26 +1,25 @@
-import { useEffect, useState } from "react";
-import api from "../api/axios";
+import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
-  const [stats, setStats] = useState(null);
-
-  useEffect(() => {
-    api.get("/reports/dashboard")
-      .then((res) => setStats(res.data))
-      .catch(console.error);
-  }, []);
+  const username = localStorage.getItem("username");
+  const navigate = useNavigate();
 
   return (
-    <div>
-      <h2>Welcome {localStorage.getItem("username")}</h2>
+    <div style={{ padding: "20px" }}>
+      <h1>Welcome {username || "User"} 👋</h1>
 
-      {stats && (
-        <>
-          <p>Total Groups: {stats.total_groups}</p>
-          <p>Total Expenses: {stats.total_expenses}</p>
-          <p>Total Settlements: {stats.total_settlements}</p>
-        </>
-      )}
+      <hr />
+
+      <div>
+        <h3>Total Groups: 0</h3>
+        <h3>Total Expenses: ₹0</h3>
+        <h3>You Owe: ₹0</h3>
+        <h3>You Are Owed: ₹0</h3>
+      </div>
+
+      <hr />
+
+      <button className="btn-primary" style={{ maxWidth: "150px" }} onClick={() => navigate("/groups")}>Groups</button>
     </div>
   );
 }
