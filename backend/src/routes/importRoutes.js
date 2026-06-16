@@ -8,14 +8,15 @@ const upload = multer({
 });
 
 const {
-  importCSV
+  analyzeCSV,
+  confirmImport
 } = require("../controllers/importController");
 
 /**
  * @swagger
- * /api/import/csv:
+ * /api/import/analyze:
  *   post:
- *     summary: Import CSV File
+ *     summary: Analyze CSV File
  *     tags:
  *       - Import
  *     requestBody:
@@ -28,11 +29,37 @@ const {
  *               file:
  *                 type: string
  *                 format: binary
+ *               group_id:
+ *                 type: integer
  */
 router.post(
-  "/csv",
+  "/analyze",
   upload.single("file"),
-  importCSV
+  analyzeCSV
+);
+
+/**
+ * @swagger
+ * /api/import/confirm:
+ *   post:
+ *     summary: Confirm and Import CSV Data
+ *     tags:
+ *       - Import
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               group_id:
+ *                 type: integer
+ *               rows:
+ *                 type: array
+ */
+router.post(
+  "/confirm",
+  confirmImport
 );
 
 module.exports = router;
