@@ -53,27 +53,68 @@ const getSettlementReport = async (req, res) => {
 
 const getDashboardReport = async (req, res) => {
   try {
-    const users = await pool.query(
-      "SELECT COUNT(*) FROM users"
+    const userId = req.user.id;
+
+    // Total Groups User is in
+    const groupsRes = await pool.query(
+      "SELECT COUNT(*) FROM group_members WHERE user_id = $1",
+      [userId]
     );
 
-    const groups = await pool.query(
-      "SELECT COUNT(*) FROM groups"
+    // Total Expenses (User's share)
+    const expensesRes = await pool.query(
+      "SELECT COALESCE(SUM(split_amount), 0) as total FROM expense_splits WHERE user_id = $1",
+      [userId]
     );
 
-    const expenses = await pool.query(
-      "SELECT COUNT(*) FROM expenses"
+    // Unique Members across all groups the user is in
+    const membersRes = await pool.query(
+      `SELECT COUNT(DISTINCT user_id) as total 
+       FROM group_members 
+       WHERE group_id IN (SELECT group_id FROM group_members WHERE user_id = $1)`,
+      [userId]
     );
 
-    const settlements = await pool.query(
-      "SELECT COUNT(*) FROM settlements"
+    // Outstanding Balance (Owed to User - User Owes)
+    const owedToMeRes = await pool.query(
+      `SELECT COALESCE(SUM(es.split_amount), 0) as total 
+       FROM expenses e 
+       JOIN expense_splits es ON e.id = es.expense_id 
+       WHERE e.paid_by = $1 AND es.user_id != $1`,
+      [userId]
     );
+    const iOweRes = await pool.query(
+      `SELECT COALESCE(SUM(es.split_amount), 0) as total 
+       FROM expenses e 
+       JOIN expense_splits es ON e.id = es.expense_id 
+       WHERE e.paid_by != $1 AND es.user_id = $1`,
+      [userId]
+    );
+
+    const settledByMeRes = await pool.query(
+      `SELECT COALESCE(SUM(amount), 0) as total FROM settlements WHERE paid_by = $1`,
+      [userId]
+    );
+    const settledToMeRes = await pool.query(
+      `SELECT COALESCE(SUM(amount), 0) as total FROM settlements WHERE paid_to = $1`,
+      [userId]
+    );
+
+    const owedToMe = Number(owedToMeRes.rows[0].total);
+    const iOwe = Number(iOweRes.rows[0].total);
+    const settledByMe = Number(settledByMeRes.rows[0].total); // Reduces what I owe
+    const settledToMe = Number(settledToMeRes.rows[0].total); // Reduces what is owed to me
+
+    const netOwedToMe = owedToMe - settledToMe;
+    const netIOwe = iOwe - settledByMe;
+    
+    const outstandingBalance = netOwedToMe - netIOwe;
 
     res.json({
-      total_users: users.rows[0].count,
-      total_groups: groups.rows[0].count,
-      total_expenses: expenses.rows[0].count,
-      total_settlements: settlements.rows[0].count
+      total_groups: Number(groupsRes.rows[0].count),
+      total_expenses: Number(expensesRes.rows[0].total),
+      total_members: Number(membersRes.rows[0].total),
+      outstanding_balance: outstandingBalance
     });
 
   } catch (error) {

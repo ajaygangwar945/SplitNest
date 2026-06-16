@@ -6,7 +6,8 @@ const authMiddleware =
 require("../middleware/authMiddleware");
 
 const {
-  createSettlement
+  createSettlement,
+  getAllSettlements
 } = require("../controllers/settlementController");
 
 /**
@@ -33,6 +34,12 @@ router.post(
   "/",
   authMiddleware,
   createSettlement
+);
+
+router.get(
+  "/",
+  authMiddleware,
+  getAllSettlements
 );
 
 module.exports = router;
