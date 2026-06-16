@@ -64,6 +64,15 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="/import"
+          element={
+            <ProtectedRoute>
+              <ImportCsv />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
