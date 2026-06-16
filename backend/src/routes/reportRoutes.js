@@ -48,9 +48,9 @@ router.get("/dashboard", authMiddleware, getDashboardReport);
  *         description: Group Summary
  */
 router.get(
-    "/groups/:id/summary",
-    authMiddleware,
-    groupSummary
+  "/groups/:id/summary",
+  authMiddleware,
+  groupSummary
 );
 
 /**
@@ -67,9 +67,9 @@ router.get(
  *         description: Expense Analytics
  */
 router.get(
-    "/analytics",
-    authMiddleware,
-    getAnalytics
+  "/analytics",
+  authMiddleware,
+  getAnalytics
 );
 
 module.exports = router;
