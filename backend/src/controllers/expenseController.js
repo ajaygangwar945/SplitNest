@@ -8,7 +8,7 @@ const createExpense = async (req, res) => {
       title,
       amount,
       expense_date
-    } = req.body;
+    } = req.body || {};
 
     const paid_by = req.user.id;
 
@@ -51,7 +51,11 @@ const splitExpense = async (req, res) => {
   try {
 
     const { expenseId } = req.params;
-    const { splits } = req.body;
+    const { splits } = req.body || {};
+
+    if (!splits || !Array.isArray(splits)) {
+      return res.status(400).json({ message: "Invalid or missing splits data" });
+    }
 
     for (const split of splits) {
 

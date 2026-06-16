@@ -6,6 +6,7 @@ import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
 import Groups from "../pages/Groups";
 import GroupDetails from "../pages/GroupDetails";
+import Expenses from "../pages/Expenses";
 import ProtectedRoute from "../components/ProtectedRoute";
 
 function AppRoutes() {
@@ -40,6 +41,15 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <GroupDetails />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/expenses"
+          element={
+            <ProtectedRoute>
+              <Expenses />
             </ProtectedRoute>
           }
         />

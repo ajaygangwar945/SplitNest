@@ -19,7 +19,10 @@ function Dashboard() {
 
       <hr />
 
-      <button className="btn-primary" style={{ maxWidth: "150px" }} onClick={() => navigate("/groups")}>Groups</button>
+      <div style={{ display: "flex", gap: "10px" }}>
+        <button className="btn-primary" style={{ maxWidth: "150px" }} onClick={() => navigate("/groups")}>Groups</button>
+        <button className="btn-primary" style={{ maxWidth: "150px" }} onClick={() => navigate("/expenses")}>Expenses</button>
+      </div>
     </div>
   );
 }

@@ -21,6 +21,22 @@ const {
  *       - Expenses
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               group_id:
+ *                 type: integer
+ *               title:
+ *                 type: string
+ *               amount:
+ *                 type: number
+ *               expense_date:
+ *                 type: string
+ *                 format: date
  */
 router.post(
   "/",
@@ -37,6 +53,28 @@ router.post(
  *       - Expenses
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: expenseId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               splits:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     user_id:
+ *                       type: integer
+ *                     amount:
+ *                       type: number
  */
 router.post(
   "/:expenseId/split",
