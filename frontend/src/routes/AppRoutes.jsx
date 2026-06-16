@@ -5,6 +5,7 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
 import Groups from "../pages/Groups";
+import GroupDetails from "../pages/GroupDetails";
 import ProtectedRoute from "../components/ProtectedRoute";
 
 function AppRoutes() {
@@ -30,6 +31,15 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <Groups />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/groups/:groupId"
+          element={
+            <ProtectedRoute>
+              <GroupDetails />
             </ProtectedRoute>
           }
         />

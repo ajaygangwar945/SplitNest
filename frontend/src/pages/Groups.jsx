@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "../api/axios";
 
 function Groups() {
   const [groups, setGroups] = useState([]);
   const [groupName, setGroupName] = useState("");
+  const navigate = useNavigate();
 
   const fetchGroups = async () => {
     try {
@@ -56,7 +58,17 @@ function Groups() {
         <p>You don't have any groups yet.</p>
       ) : (
         groups.map((group) => (
-          <div key={group.id} style={{ padding: "10px", background: "var(--card-bg)", borderRadius: "8px", marginBottom: "10px", boxShadow: "var(--shadow-sm)" }}>
+          <div 
+            key={group.id} 
+            onClick={() => navigate(`/groups/${group.id}`)}
+            style={{ 
+              padding: "10px", 
+              background: "var(--card-bg)", 
+              borderRadius: "8px", 
+              marginBottom: "10px", 
+              boxShadow: "var(--shadow-sm)",
+              cursor: "pointer" 
+            }}>
             {group.group_name}
           </div>
         ))

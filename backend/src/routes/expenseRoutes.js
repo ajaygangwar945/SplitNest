@@ -8,7 +8,8 @@ require("../middleware/authMiddleware");
 const {
   createExpense,
   splitExpense,
-  getBalances
+  getBalances,
+  getGroupExpenses
 } = require("../controllers/expenseController");
 
 /**
@@ -57,6 +58,28 @@ router.get(
   "/balances",
   authMiddleware,
   getBalances
+);
+
+/**
+ * @swagger
+ * /api/expenses/group/{groupId}:
+ *   get:
+ *     summary: Get Expenses By Group
+ *     tags:
+ *       - Expenses
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema:
+ *           type: integer
+ */
+router.get(
+  "/group/:groupId",
+  authMiddleware,
+  getGroupExpenses
 );
 
 module.exports = router;

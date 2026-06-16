@@ -7,9 +7,10 @@ const createExpense = async (req, res) => {
       group_id,
       title,
       amount,
-      paid_by,
       expense_date
     } = req.body;
+
+    const paid_by = req.user.id;
 
     const result = await pool.query(
       `
@@ -113,8 +114,32 @@ const getBalances = async (req, res) => {
   }
 };
 
+const getGroupExpenses = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+
+    const result = await pool.query(
+      `
+      SELECT *
+      FROM expenses
+      WHERE group_id = $1
+      ORDER BY id DESC
+      `,
+      [groupId]
+    );
+
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Server Error"
+    });
+  }
+};
+
 module.exports = {
   createExpense,
   splitExpense,
-  getBalances
+  getBalances,
+  getGroupExpenses
 };
