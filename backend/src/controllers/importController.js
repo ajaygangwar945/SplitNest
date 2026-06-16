@@ -274,7 +274,7 @@ const confirmImport = async (req, res) => {
         );
         const newId = uRes.rows[0].id;
         await pool.query(
-          `INSERT INTO group_members (group_id, user_id) VALUES ($1, $2)`,
+          `INSERT INTO group_members (group_id, user_id, joined_at) VALUES ($1, $2, CURRENT_TIMESTAMP)`,
           [group_id, newId]
         );
         members.push({ id: newId, name });
