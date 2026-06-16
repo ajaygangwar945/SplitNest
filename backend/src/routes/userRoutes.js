@@ -8,12 +8,12 @@ const {
 
 router.get("/", getUsers);
 
-const verifyToken =
+const authMiddleware =
 require("../middleware/authMiddleware");
 
 router.get(
   "/profile",
-  verifyToken,
+  authMiddleware,
   (req, res) => {
 
     res.json({

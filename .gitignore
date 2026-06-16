@@ -1,2 +1,22 @@
-node_modules
+# Node
+node_modules/
+
+# Environment
 .env
+
+# Uploads
+backend/uploads/*
+
+# Logs
+*.log
+
+# Build files
+dist/
+build/
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

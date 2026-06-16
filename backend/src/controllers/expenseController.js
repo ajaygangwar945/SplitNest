@@ -87,7 +87,34 @@ const splitExpense = async (req, res) => {
   }
 };
 
+const getBalances = async (req, res) => {
+  try {
+
+    const result = await pool.query(`
+      SELECT
+        e.paid_by,
+        es.user_id,
+        es.split_amount
+      FROM expenses e
+      JOIN expense_splits es
+      ON e.id = es.expense_id
+    `);
+
+    res.json(result.rows);
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      message: "Server Error"
+    });
+
+  }
+};
+
 module.exports = {
   createExpense,
-  splitExpense
+  splitExpense,
+  getBalances
 };

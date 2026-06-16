@@ -6,20 +6,40 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./config/swagger");
 const userRoutes = require("./routes/userRoutes");
 const authRoutes = require("./routes/authRoutes");
 const groupRoutes = require("./routes/groupRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
+const settlementRoutes = require("./routes/settlementRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
+const importRoutes = require("./routes/importRoutes");
+const reportRoutes = require("./routes/reportRoutes");
+const balanceRoutes = require("./routes/balanceRoutes");
+
 
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/groups", groupRoutes);
 app.use("/api/expenses", expenseRoutes);
+app.use("/api/settlements", settlementRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/import", importRoutes);
+app.use("/api/reports", reportRoutes);
+app.use("/api/balances", balanceRoutes);
+
 
 
 app.get("/", (req, res) => {
   res.send("SplitNest Backend Running");
 });
+
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec)
+);
 
 // 404 handler — catches requests that don't match any route
 app.use((req, res) => {
