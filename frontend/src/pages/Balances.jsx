@@ -148,8 +148,8 @@ function Balances() {
   return (
     <div className="container animate-slide-up">
       <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "2rem" }}>
-        <h1 style={{ margin: 0, fontSize: "2.5rem", background: "linear-gradient(to right, var(--primary), var(--secondary))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-          Net Balances
+        <h1 className="page-title">
+          Balances
         </h1>
       </div>
 

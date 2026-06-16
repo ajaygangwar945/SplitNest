@@ -85,8 +85,8 @@ function ImportCsv() {
   return (
     <div className="container animate-slide-up">
       <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "2rem" }}>
-        <h1 style={{ margin: 0, fontSize: "2.5rem", background: "linear-gradient(to right, var(--primary), var(--secondary))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-          Import from CSV
+        <h1 className="page-title">
+          Import CSV
         </h1>
       </div>
       

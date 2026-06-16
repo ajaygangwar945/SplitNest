@@ -302,6 +302,20 @@ a:hover {
 }
 
 
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 2.5rem;
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 @media (min-width: 769px) and (max-width: 1024px) {
   .bento-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -326,10 +340,10 @@ a:hover {
     padding: 1.25rem !important;
   }
   h1 {
-    font-size: 2rem !important;
+    font-size: 1.6rem !important;
   }
   h2 {
-    font-size: 1.5rem !important;
+    font-size: 1.3rem !important;
   }
   td, th {
     padding: 12px 10px !important;
@@ -339,5 +353,14 @@ a:hover {
     width: 32px;
     height: 32px;
     font-size: 0.9rem;
+  }
+  .floating-shape {
+    font-size: 2rem !important;
+  }
+  .stat-value {
+    font-size: 1.8rem !important;
+  }
+  .page-title {
+    font-size: 1.8rem !important;
   }
 }

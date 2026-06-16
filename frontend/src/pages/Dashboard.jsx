@@ -37,7 +37,7 @@ function Dashboard() {
   return (
     <div className="container animate-slide-up">
       <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "2rem" }}>
-        <h1 style={{ margin: 0, fontSize: "2.5rem", background: "linear-gradient(to right, var(--primary), var(--secondary))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+        <h1 className="page-title">
           Welcome back
         </h1>
       </div>
@@ -50,7 +50,7 @@ function Dashboard() {
             </div>
             <h3 style={{ margin: 0, fontSize: "1.1rem" }}>Total Groups</h3>
           </div>
-          <p style={{ fontSize: "2.5rem", fontWeight: "800", margin: 0 }}>{stats.total_groups}</p>
+          <p className="stat-value">{stats.total_groups}</p>
         </div>
         
         <div className="card" style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -60,7 +60,7 @@ function Dashboard() {
             </div>
             <h3 style={{ margin: 0, fontSize: "1.1rem" }}>Total Expenses</h3>
           </div>
-          <p style={{ fontSize: "2.5rem", fontWeight: "800", margin: 0 }}>₹{stats.total_expenses.toFixed(2)}</p>
+          <p className="stat-value">₹{stats.total_expenses.toFixed(2)}</p>
         </div>
 
         <div className="card" style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "16px", background: stats.outstanding_balance > 0 ? "#f0fdf4" : stats.outstanding_balance < 0 ? "#fef2f2" : "var(--card-bg)" }}>
@@ -71,7 +71,7 @@ function Dashboard() {
             <h3 style={{ margin: 0, fontSize: "1.1rem" }}>Net Balance</h3>
           </div>
           <div>
-            <p style={{ fontSize: "2.5rem", fontWeight: "800", margin: 0, color: stats.outstanding_balance > 0 ? "#16a34a" : stats.outstanding_balance < 0 ? "#dc2626" : "inherit" }}>
+            <p className="stat-value" style={{ color: stats.outstanding_balance > 0 ? "#16a34a" : stats.outstanding_balance < 0 ? "#dc2626" : "inherit" }}>
               {stats.outstanding_balance > 0 ? "+" : ""}₹{stats.outstanding_balance.toFixed(2)}
             </p>
             <span className={`badge ${stats.outstanding_balance > 0 ? "badge-success" : stats.outstanding_balance < 0 ? "badge-danger" : ""}`} style={{ marginTop: "8px" }}>
@@ -87,7 +87,7 @@ function Dashboard() {
             </div>
             <h3 style={{ margin: 0, fontSize: "1.1rem" }}>Network</h3>
           </div>
-          <p style={{ fontSize: "2.5rem", fontWeight: "800", margin: 0 }}>{stats.total_members} <span style={{ fontSize: "1rem", fontWeight: "500", color: "var(--text-muted)" }}>people</span></p>
+          <p className="stat-value">{stats.total_members} <span style={{ fontSize: "1rem", fontWeight: "500", color: "var(--text-muted)" }}>people</span></p>
         </div>
       </div>
     </div>
