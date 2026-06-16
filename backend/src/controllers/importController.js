@@ -217,19 +217,7 @@ const analyzeCSV = async (req, res) => {
               skip
             });
 
-            // --- Log Anomalies ---
-            if (issues.length > 0) {
-              issues.forEach(async (issue) => {
-                try {
-                  await pool.query(
-                    `INSERT INTO import_logs (anomaly_type, description, action_taken) VALUES ($1, $2, $3)`,
-                    ["ANOMALY", row.description || "Unknown row", issue]
-                  );
-                } catch (e) {
-                  console.error("Failed to log anomaly", e);
-                }
-              });
-            }
+
           }
 
           // --- 7. Duplicate Entries ---
@@ -249,6 +237,34 @@ const analyzeCSV = async (req, res) => {
               }
             }
           }
+
+          // --- Log Anomalies ---
+          report.forEach(r => {
+            if (r.issues && r.issues.length > 0) {
+              r.issues.forEach(async (issue) => {
+                let anomalyType = "ANOMALY";
+                let actionTaken = r.skip ? "Skipped Row" : "Included with Warning";
+                let desc = r.original && r.original.description ? `${r.original.description} - ${issue}` : issue;
+
+                if (issue.includes("not a number")) anomalyType = "INVALID_AMOUNT";
+                else if (issue.includes("Negative amount")) anomalyType = "NEGATIVE_AMOUNT";
+                else if (issue.includes("Unknown member")) anomalyType = "UNKNOWN_MEMBER";
+                else if (issue.includes("Zero amount")) anomalyType = "ZERO_AMOUNT";
+                else if (issue.includes("duplicate")) anomalyType = "DUPLICATE_EXPENSE";
+                else if (issue.includes("Missing 'paid_by'")) anomalyType = "MISSING_PAYER";
+                else if (issue.includes("settlement")) anomalyType = "MISLABELED_SETTLEMENT";
+                
+                try {
+                  await pool.query(
+                    `INSERT INTO import_logs (anomaly_type, description, action_taken) VALUES ($1, $2, $3)`,
+                    [anomalyType, desc, actionTaken]
+                  );
+                } catch (e) {
+                  console.error("Failed to log anomaly", e);
+                }
+              });
+            }
+          });
 
           res.status(200).json(report);
 
