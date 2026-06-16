@@ -15,7 +15,19 @@ const createGroup = async (req, res) => {
       [group_name, req.user.id]
     );
 
-    res.status(201).json(result.rows[0]);
+    const newGroup = result.rows[0];
+
+    // Auto-add the creator as a member
+    await pool.query(
+      `
+      INSERT INTO group_members
+      (group_id, user_id, joined_at)
+      VALUES ($1, $2, CURRENT_DATE)
+      `,
+      [newGroup.id, req.user.id]
+    );
+
+    res.status(201).json(newGroup);
 
   } catch (error) {
 
@@ -32,7 +44,13 @@ const getGroups = async (req, res) => {
   try {
 
     const result = await pool.query(
-      "SELECT * FROM groups"
+      `
+      SELECT g.* FROM groups g
+      JOIN group_members gm ON g.id = gm.group_id
+      WHERE gm.user_id = $1 AND gm.left_at IS NULL
+      ORDER BY g.id DESC
+      `,
+      [req.user.id]
     );
 
     res.status(200).json(
