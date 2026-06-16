@@ -26,7 +26,7 @@ router.get("/settlements", getSettlementReport);
  *       200:
  *         description: Dashboard data
  */
-router.get("/dashboard", getDashboardReport);
+router.get("/dashboard", authMiddleware, getDashboardReport);
 
 /**
  * @swagger
