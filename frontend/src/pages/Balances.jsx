@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 import toast from "react-hot-toast";
+import { Wallet, ArrowRight, Search, CheckCircle, X, History, Receipt } from "lucide-react";
 
 function Balances() {
   const [userMap, setUserMap] = useState({});
@@ -11,11 +12,9 @@ function Balances() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      // 1. Fetch groups to get members
       const groupsRes = await api.get("/groups");
       const groups = groupsRes.data;
 
-      // 2. Fetch all members across all groups
       const map = {};
       for (const group of groups) {
         const membersRes = await api.get(`/groups/${group.id}/members`);
@@ -39,18 +38,14 @@ function Balances() {
 
       setUserMap(map);
 
-      // 3. Fetch balances
       const balancesRes = await api.get("/expenses/balances");
       const rawBalances = balancesRes.data;
 
-      // 4. Fetch settlements
       const settlementsRes = await api.get("/settlements");
       const settlements = settlementsRes.data;
 
-      // 5. Compute Net Balances
       const netBalances = {};
       
-      // Add up all expenses
       rawBalances.forEach(({ paid_by, user_id, split_amount }) => {
         if (paid_by === user_id) return;
         const amount = Number(split_amount);
@@ -65,12 +60,10 @@ function Balances() {
         netBalances[paid_by][user_id] -= amount;
       });
 
-      // Subtract settlements
-      // If paid_by paid paid_to an amount, then paid_by's debt to paid_to decreases
       settlements.forEach(s => {
         const amount = Number(s.amount);
-        const payer = s.paid_by; // user ID who paid
-        const receiver = s.paid_to; // user ID who received
+        const payer = s.paid_by;
+        const receiver = s.paid_to;
 
         if (netBalances[payer] && netBalances[payer][receiver]) {
           netBalances[payer][receiver] -= amount;
@@ -80,11 +73,9 @@ function Balances() {
         }
       });
 
-      // 6. Convert to List
       const debtList = [];
       for (const [A, owesObj] of Object.entries(netBalances)) {
         for (const [B, amount] of Object.entries(owesObj)) {
-          // Because of floating point math, check if amount is > 0.01
           if (amount > 0.01) {
             debtList.push({
               fromId: Number(A),
@@ -131,13 +122,13 @@ function Balances() {
     setSettling(true);
     try {
       await api.post("/settlements", {
-        group_id: null, // Global settlement
+        group_id: null,
         paid_by: debt.fromId,
         paid_to: debt.toId,
         amount: debt.amount
       });
       toast.success("Settled up successfully!");
-      fetchData(); // Refresh balances
+      fetchData();
     } catch (error) {
       console.error("Error settling up:", error);
       toast.error("Failed to settle up");
@@ -147,83 +138,147 @@ function Balances() {
   };
 
   if (loading && debts.length === 0) {
-    return <div style={{ padding: "20px" }}>Loading balances...</div>;
+    return (
+      <div className="container animate-fade-in" style={{ display: "flex", justifyContent: "center", padding: "4rem" }}>
+        <div style={{ width: "40px", height: "40px", border: "4px solid var(--border-color)", borderTopColor: "var(--primary)", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
+      </div>
+    );
   }
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Balances</h1>
+    <div className="container animate-slide-up">
+      <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "2rem" }}>
+        <h1 style={{ margin: 0, fontSize: "2.5rem", background: "linear-gradient(to right, var(--primary), var(--secondary))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+          Net Balances
+        </h1>
+      </div>
 
-      <div style={{ background: "var(--card-bg)", padding: "20px", borderRadius: "8px", boxShadow: "var(--shadow-sm)" }}>
-        <h2>Net Balance</h2>
+      <div className="card" style={{ padding: "24px", marginBottom: "2rem" }}>
+        <h2 style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: 0, marginBottom: "1.5rem" }}>
+          <Wallet size={24} color="var(--primary)" /> Who Owes Whom
+        </h2>
         
         {debts.length === 0 ? (
-          <p>All settled up! No one owes anything.</p>
+          <div style={{ padding: "3rem", textAlign: "center", color: "var(--text-muted)", display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
+            <CheckCircle size={48} color="#10b981" />
+            <h3 style={{ margin: 0 }}>All Settled Up!</h3>
+            <p style={{ margin: 0 }}>No one owes anything right now.</p>
+          </div>
         ) : (
-          debts.map((debt, index) => (
-            <div key={index} style={{ padding: "15px", borderBottom: index < debts.length - 1 ? "1px solid var(--border-color)" : "none", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "1.1rem" }}>
-              <div>
-                <span style={{ fontWeight: "bold", color: "red", marginRight: "10px" }}>
-                  {userMap[debt.fromId] || `User ${debt.fromId}`}
-                </span>
-                <span style={{ marginRight: "10px" }}>owes</span>
-                <span style={{ fontWeight: "bold", color: "green", marginRight: "10px" }}>
-                  {userMap[debt.toId] || `User ${debt.toId}`}
-                </span>
-                <span style={{ fontWeight: "bold" }}>
-                  ₹{debt.amount.toFixed(2)}
-                </span>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {debts.map((debt, index) => (
+              <div key={index} className="animate-fade-in" style={{ 
+                padding: "16px", 
+                background: "var(--input-bg)", 
+                borderRadius: "12px", 
+                display: "flex", 
+                justifyContent: "space-between", 
+                alignItems: "center", 
+                flexWrap: "wrap",
+                gap: "1rem",
+                animationDelay: `${index * 0.1}s`
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <div className="avatar" style={{ background: "#fee2e2", color: "#991b1b" }}>
+                      {(userMap[debt.fromId] || `U${debt.fromId}`).substring(0, 2).toUpperCase()}
+                    </div>
+                    <span style={{ fontWeight: "600", color: "var(--text-main)" }}>
+                      {userMap[debt.fromId] || `User ${debt.fromId}`}
+                    </span>
+                  </div>
+                  
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "0 10px" }}>
+                    <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: "600" }}>OWES</span>
+                    <ArrowRight size={20} color="var(--primary)" />
+                  </div>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <div className="avatar" style={{ background: "#dcfce7", color: "#166534" }}>
+                      {(userMap[debt.toId] || `U${debt.toId}`).substring(0, 2).toUpperCase()}
+                    </div>
+                    <span style={{ fontWeight: "600", color: "var(--text-main)" }}>
+                      {userMap[debt.toId] || `User ${debt.toId}`}
+                    </span>
+                  </div>
+
+                  <div style={{ fontSize: "1.5rem", fontWeight: "800", color: "var(--text-main)", marginLeft: "1rem" }}>
+                    ₹{debt.amount.toFixed(2)}
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                  <button 
+                    style={{ display: "flex", alignItems: "center", gap: "6px", width: "auto", padding: "8px 16px", borderRadius: "8px", border: "1px solid var(--border-color)", cursor: "pointer", background: "white", fontWeight: "500", transition: "all 0.2s" }}
+                    onClick={() => handleViewDetails(debt)}
+                    onMouseOver={(e) => e.currentTarget.style.background = "var(--input-focus)"}
+                    onMouseOut={(e) => e.currentTarget.style.background = "white"}
+                  >
+                    <Search size={16} /> Details
+                  </button>
+                  <button 
+                    className="btn-primary" 
+                    style={{ margin: 0, display: "flex", alignItems: "center", gap: "6px", width: "auto", padding: "8px 16px", background: "linear-gradient(135deg, #10b981 0%, #059669 100%)", boxShadow: "0 4px 14px 0 rgba(16, 185, 129, 0.39)" }}
+                    onClick={() => handleSettleUp(debt)}
+                    disabled={settling}
+                  >
+                    <CheckCircle size={16} />
+                    {settling ? "Processing..." : "Settle Up"}
+                  </button>
+                </div>
               </div>
-              <div style={{ display: "flex", gap: "10px" }}>
-                <button 
-                  style={{ width: "auto", padding: "8px 16px", borderRadius: "6px", border: "1px solid var(--border-color)", cursor: "pointer", background: "transparent" }}
-                  onClick={() => handleViewDetails(debt)}
-                >
-                  View Details
-                </button>
-                <button 
-                  className="btn-primary" 
-                  style={{ width: "auto", padding: "8px 16px", background: "#10b981" }}
-                  onClick={() => handleSettleUp(debt)}
-                  disabled={settling}
-                >
-                  {settling ? "Processing..." : "Settle Up"}
-                </button>
-              </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </div>
 
+      {/* Details Modal */}
       {selectedDebt && (
-        <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", background: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 }}>
-          <div style={{ background: "var(--card-bg)", padding: "20px", borderRadius: "8px", width: "90%", maxWidth: "600px", maxHeight: "80vh", overflowY: "auto" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border-color)", paddingBottom: "10px", marginBottom: "15px" }}>
-              <h2>Transaction Details</h2>
-              <button onClick={() => setSelectedDebt(null)} style={{ background: "transparent", border: "none", fontSize: "1.5rem", cursor: "pointer" }}>×</button>
-            </div>
+        <div className="animate-fade-in" style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000, padding: "1rem" }}>
+          <div className="card animate-slide-up" style={{ padding: "24px", width: "100%", maxWidth: "600px", maxHeight: "85vh", overflowY: "auto", position: "relative" }}>
+            <button 
+              onClick={() => setSelectedDebt(null)} 
+              style={{ position: "absolute", top: "20px", right: "20px", background: "var(--input-bg)", border: "none", width: "32px", height: "32px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--text-muted)" }}
+            >
+              <X size={20} />
+            </button>
+
+            <h2 style={{ marginTop: 0, display: "flex", alignItems: "center", gap: "10px", marginBottom: "1.5rem" }}>
+              <History size={24} color="var(--primary)" /> Transaction Details
+            </h2>
             
-            <p>Raw transactions between <b>{userMap[selectedDebt.fromId]}</b> and <b>{userMap[selectedDebt.toId]}</b>:</p>
+            <p style={{ color: "var(--text-muted)", marginBottom: "1.5rem" }}>
+              Showing raw, unsimplified transactions between <b>{userMap[selectedDebt.fromId]}</b> and <b>{userMap[selectedDebt.toId]}</b>:
+            </p>
             
             {loadingDetails ? (
-              <p>Loading transactions...</p>
+              <div style={{ textAlign: "center", padding: "2rem" }}>Loading transactions...</div>
             ) : debtDetails.length === 0 ? (
-              <p>No direct transactions found. This debt may be the result of multi-party debt simplification.</p>
+              <div style={{ background: "var(--input-bg)", padding: "2rem", borderRadius: "12px", textAlign: "center", color: "var(--text-muted)" }}>
+                No direct transactions found. This debt is the result of multi-party debt simplification (e.g. A owes B, B owes C, so A owes C).
+              </div>
             ) : (
-              <ul style={{ listStyle: "none", padding: 0 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                 {debtDetails.map(txn => (
-                  <li key={txn.id} style={{ padding: "10px", borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between" }}>
-                    <div>
-                      <strong>{txn.title}</strong><br/>
-                      <small style={{ color: "#666" }}>{new Date(txn.expense_date).toLocaleDateString()} • Paid by {txn.paid_by_name}</small>
+                  <div key={txn.id} style={{ padding: "16px", background: "var(--input-bg)", borderRadius: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <div style={{ padding: "10px", background: "white", borderRadius: "8px", color: "var(--primary)" }}>
+                        <Receipt size={20} />
+                      </div>
+                      <div>
+                        <strong style={{ display: "block", fontSize: "1.1rem" }}>{txn.title}</strong>
+                        <small style={{ color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "4px", marginTop: "4px" }}>
+                          {new Date(txn.expense_date).toLocaleDateString()} • Paid by {txn.paid_by_name}
+                        </small>
+                      </div>
                     </div>
                     <div style={{ textAlign: "right" }}>
-                      <span style={{ fontWeight: "bold" }}>₹{txn.split_amount}</span><br/>
-                      <small>Total: ₹{txn.total_amount}</small>
+                      <span style={{ fontWeight: "800", fontSize: "1.2rem", color: "var(--text-main)" }}>₹{txn.split_amount}</span>
+                      <div style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginTop: "4px" }}>Total: ₹{txn.total_amount}</div>
                     </div>
-                  </li>
+                  </div>
                 ))}
-              </ul>
+              </div>
             )}
           </div>
         </div>

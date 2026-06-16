@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import api from "../api/axios";
 import toast from "react-hot-toast";
+import { UploadCloud, FileSpreadsheet, AlertTriangle, CheckCircle2, XCircle, Users, ArrowRight } from "lucide-react";
 
 function ImportCsv() {
   const [groups, setGroups] = useState([]);
@@ -18,6 +19,9 @@ function ImportCsv() {
     try {
       const response = await api.get("/groups");
       setGroups(response.data);
+      if (response.data.length > 0 && !selectedGroupId) {
+        setSelectedGroupId(response.data[0].id.toString());
+      }
     } catch (error) {
       console.error(error);
     }
@@ -79,116 +83,160 @@ function ImportCsv() {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Import Expenses from CSV</h1>
+    <div className="container animate-slide-up">
+      <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "2rem" }}>
+        <h1 style={{ margin: 0, fontSize: "2.5rem", background: "linear-gradient(to right, var(--primary), var(--secondary))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+          Import from CSV
+        </h1>
+      </div>
       
       {!report && (
-        <div style={{ background: "var(--card-bg)", padding: "20px", borderRadius: "8px", maxWidth: "500px", boxShadow: "var(--shadow-sm)" }}>
-          <form onSubmit={handleAnalyze} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+        <div className="card" style={{ padding: "32px", maxWidth: "600px", margin: "0 auto" }}>
+          <form onSubmit={handleAnalyze} style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+            
             <div>
-              <label>Select Group</label>
-              <select 
-                className="form-control"
-                value={selectedGroupId} 
-                onChange={(e) => setSelectedGroupId(e.target.value)}
-                required
-              >
-                <option value="">Select a Group...</option>
-                {groups.map(group => (
-                  <option key={group.id} value={group.id}>{group.group_name}</option>
-                ))}
-              </select>
+              <label style={{ display: "block", marginBottom: "8px", fontWeight: "600" }}>1. Select Target Group</label>
+              <div style={{ position: "relative" }}>
+                <Users size={18} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
+                <select 
+                  className="form-control"
+                  style={{ paddingLeft: "40px", cursor: "pointer" }}
+                  value={selectedGroupId} 
+                  onChange={(e) => setSelectedGroupId(e.target.value)}
+                  required
+                >
+                  <option value="" disabled>Select a Group...</option>
+                  {groups.map(group => (
+                    <option key={group.id} value={group.id}>{group.group_name}</option>
+                  ))}
+                </select>
+              </div>
             </div>
+
             <div>
-              <label>CSV File</label>
-              <input 
-                type="file" 
-                accept=".csv"
-                className="form-control"
-                onChange={(e) => setFile(e.target.files[0])}
-                ref={fileInputRef}
-                required
-              />
+              <label style={{ display: "block", marginBottom: "8px", fontWeight: "600" }}>2. Upload Spreadsheet</label>
+              <div style={{ 
+                border: "2px dashed var(--border-color)", 
+                borderRadius: "16px", 
+                padding: "40px 20px", 
+                textAlign: "center",
+                background: file ? "var(--input-focus)" : "var(--input-bg)",
+                transition: "all 0.2s",
+                position: "relative",
+                cursor: "pointer"
+              }}>
+                <input 
+                  type="file" 
+                  accept=".csv"
+                  onChange={(e) => setFile(e.target.files[0])}
+                  ref={fileInputRef}
+                  required
+                  style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", opacity: 0, cursor: "pointer" }}
+                />
+                
+                {file ? (
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px", color: "var(--primary)" }}>
+                    <FileSpreadsheet size={48} />
+                    <span style={{ fontWeight: "600", fontSize: "1.1rem" }}>{file.name}</span>
+                    <span style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>Click to change file</span>
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px", color: "var(--text-muted)" }}>
+                    <UploadCloud size={48} />
+                    <span style={{ fontWeight: "600", fontSize: "1.1rem" }}>Drag & Drop or Click to Upload</span>
+                    <span style={{ fontSize: "0.85rem" }}>Supports .csv exports</span>
+                  </div>
+                )}
+              </div>
             </div>
-            <button type="submit" className="btn-primary" disabled={loading}>
-              {loading ? "Analyzing..." : "Analyze CSV"}
+
+            <button type="submit" className="btn-primary" disabled={loading} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", padding: "1rem" }}>
+              {loading ? "Analyzing..." : "Analyze File"} <ArrowRight size={20} />
             </button>
           </form>
         </div>
       )}
 
       {report && (
-        <div style={{ marginTop: "20px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
-            <h2>Import Report</h2>
+        <div className="animate-fade-in" style={{ marginTop: "20px" }}>
+          <div className="card" style={{ padding: "24px", marginBottom: "24px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
+            <div>
+              <h2 style={{ margin: 0, display: "flex", alignItems: "center", gap: "10px" }}>
+                <FileSpreadsheet color="var(--primary)" /> Import Review
+              </h2>
+              <p style={{ margin: "4px 0 0 0", color: "var(--text-muted)" }}>Please review the anomalies below before confirming.</p>
+            </div>
             <div style={{ display: "flex", gap: "10px" }}>
-              <button className="btn-primary" onClick={handleConfirm} disabled={loading}>
-                {loading ? "Importing..." : "Confirm & Import"}
-              </button>
               <button 
-                onClick={() => setReport(null)} 
-                style={{ padding: "10px 15px", borderRadius: "8px", border: "1px solid var(--border-color)", background: "transparent", cursor: "pointer" }}
+                onClick={() => { setReport(null); setFile(null); }} 
+                style={{ padding: "10px 20px", borderRadius: "8px", border: "1px solid var(--border-color)", background: "white", cursor: "pointer", fontWeight: "600" }}
               >
                 Cancel
+              </button>
+              <button className="btn-primary" onClick={handleConfirm} disabled={loading} style={{ margin: 0, width: "auto", padding: "10px 24px", display: "flex", alignItems: "center", gap: "8px" }}>
+                <CheckCircle2 size={18} /> {loading ? "Importing..." : "Confirm & Import"}
               </button>
             </div>
           </div>
           
-          <div style={{ overflowX: "auto", background: "var(--card-bg)", borderRadius: "8px", boxShadow: "var(--shadow-sm)" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+          <div className="card" style={{ overflowX: "auto", padding: 0 }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", minWidth: "800px" }}>
               <thead>
-                <tr style={{ borderBottom: "2px solid var(--border-color)" }}>
-                  <th style={{ padding: "12px" }}>Status</th>
-                  <th style={{ padding: "12px" }}>Date</th>
-                  <th style={{ padding: "12px" }}>Description</th>
-                  <th style={{ padding: "12px" }}>Amount</th>
-                  <th style={{ padding: "12px" }}>Issues & Proposed Actions</th>
-                  <th style={{ padding: "12px" }}>Action</th>
+                <tr style={{ borderBottom: "2px solid var(--border-color)", background: "var(--input-bg)" }}>
+                  <th style={{ padding: "16px", fontWeight: "600" }}>Status</th>
+                  <th style={{ padding: "16px", fontWeight: "600" }}>Date</th>
+                  <th style={{ padding: "16px", fontWeight: "600" }}>Description</th>
+                  <th style={{ padding: "16px", fontWeight: "600" }}>Amount</th>
+                  <th style={{ padding: "16px", fontWeight: "600" }}>Issues Detected</th>
+                  <th style={{ padding: "16px", fontWeight: "600", textAlign: "center" }}>Action</th>
                 </tr>
               </thead>
               <tbody>
                 {report.map((r, i) => (
-                  <tr key={i} style={{ borderBottom: "1px solid var(--border-color)", opacity: r.skip ? 0.5 : 1 }}>
-                    <td style={{ padding: "12px" }}>
-                      <span style={{ 
-                        padding: "4px 8px", 
-                        borderRadius: "4px", 
-                        fontSize: "0.85em",
-                        background: r.status === "Error" ? "#fee2e2" : r.status === "Warning" ? "#fef3c7" : "#dcfce7",
-                        color: r.status === "Error" ? "#991b1b" : r.status === "Warning" ? "#92400e" : "#166534"
-                      }}>
+                  <tr key={i} style={{ borderBottom: "1px solid var(--border-color)", opacity: r.skip ? 0.4 : 1, transition: "opacity 0.2s" }}>
+                    <td style={{ padding: "16px" }}>
+                      <span className={`badge badge-${r.status === "Error" ? "danger" : r.status === "Warning" ? "warning" : "success"}`} style={{ display: "flex", gap: "6px", width: "fit-content" }}>
+                        {r.status === "Error" ? <XCircle size={14} /> : r.status === "Warning" ? <AlertTriangle size={14} /> : <CheckCircle2 size={14} />}
                         {r.status}
                       </span>
                     </td>
-                    <td style={{ padding: "12px" }}>{r.original.date}<br/><small style={{ color: "var(--primary)" }}>{r.proposed.date !== r.original.date ? r.proposed.date : ""}</small></td>
-                    <td style={{ padding: "12px" }}>{r.proposed.description}</td>
-                    <td style={{ padding: "12px" }}>
-                      ₹{r.original.amount} 
+                    <td style={{ padding: "16px" }}>
+                      <div style={{ fontWeight: "500" }}>{r.original.date}</div>
+                      {r.proposed.date !== r.original.date && <div style={{ color: "var(--primary)", fontSize: "0.85rem", marginTop: "4px" }}>➔ {r.proposed.date}</div>}
+                    </td>
+                    <td style={{ padding: "16px", fontWeight: "500" }}>{r.proposed.description}</td>
+                    <td style={{ padding: "16px" }}>
+                      <div style={{ fontWeight: "600" }}>₹{r.original.amount}</div>
                       {r.proposed.amount !== r.original.amount && (
-                        <div style={{ color: "var(--primary)", fontSize: "0.9em" }}>➔ ₹{r.proposed.amount}</div>
+                        <div style={{ color: "var(--primary)", fontSize: "0.85rem", marginTop: "4px", fontWeight: "600" }}>➔ ₹{r.proposed.amount}</div>
                       )}
                     </td>
-                    <td style={{ padding: "12px", maxWidth: "300px" }}>
-                      {r.issues.length === 0 ? <span style={{ color: "#6b7280" }}>Looks good</span> : (
-                        <ul style={{ margin: 0, paddingLeft: "20px", color: "#b91c1c", fontSize: "0.9em" }}>
-                          {r.issues.map((issue, idx) => <li key={idx}>{issue}</li>)}
-                        </ul>
+                    <td style={{ padding: "16px", maxWidth: "300px" }}>
+                      {r.issues.length === 0 ? <span style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>Looks good</span> : (
+                        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                          {r.issues.map((issue, idx) => (
+                            <div key={idx} style={{ fontSize: "0.85rem", color: r.status === "Error" ? "#991b1b" : "#92400e", background: r.status === "Error" ? "#fef2f2" : "#fffbeb", padding: "4px 8px", borderRadius: "4px" }}>
+                              • {issue}
+                            </div>
+                          ))}
+                        </div>
                       )}
                     </td>
-                    <td style={{ padding: "12px" }}>
+                    <td style={{ padding: "16px", textAlign: "center" }}>
                       <button 
                         onClick={() => toggleSkip(i)}
                         style={{
-                          padding: "6px 12px",
-                          borderRadius: "4px",
-                          border: "1px solid",
-                          borderColor: r.skip ? "#10b981" : "#ef4444",
-                          background: r.skip ? "#ecfdf5" : "#fef2f2",
-                          color: r.skip ? "#047857" : "#b91c1c",
-                          cursor: "pointer"
+                          padding: "8px 16px",
+                          borderRadius: "8px",
+                          border: "none",
+                          background: r.skip ? "var(--text-main)" : "#fee2e2",
+                          color: r.skip ? "white" : "#991b1b",
+                          fontWeight: "600",
+                          cursor: "pointer",
+                          transition: "all 0.2s"
                         }}
                       >
-                        {r.skip ? "Include" : "Skip"}
+                        {r.skip ? "Include Row" : "Skip Row"}
                       </button>
                     </td>
                   </tr>
