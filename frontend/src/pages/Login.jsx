@@ -1,6 +1,7 @@
 import { useState } from "react";
 import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 function Login() {
     const [email, setEmail] = useState("");
@@ -19,43 +20,66 @@ function Login() {
 
             localStorage.setItem("token", res.data.token);
             localStorage.setItem("username", res.data.user.name);
-            alert("Login Successful");
+            toast.success("Login Successful");
             navigate("/dashboard");
         } catch (err) {
-            alert(err.response?.data?.message || "Login Failed");
+            toast.error(err.response?.data?.message || "Login Failed");
         }
     };
 
     return (
-        <div>
-            <h2>Login</h2>
+        <div className="auth-container">
+            {/* Floating Background Elements */}
+            <div className="floating-shape shape-1">💸</div>
+            <div className="floating-shape shape-2">🧾</div>
+            <div className="floating-shape shape-3">💳</div>
+            <div className="floating-shape shape-4">🤝</div>
+            <div className="floating-shape shape-5">💰</div>
+            <div className="floating-shape shape-6">📊</div>
 
-            <form onSubmit={handleLogin}>
-                <input
-                    type="email"
-                    placeholder="Email"
-                    onChange={(e) => setEmail(e.target.value)}
-                />
+            <div className="auth-card">
+                <div className="logo-container">
+                    <img src="/favicon.png" alt="SplitNest Logo" />
+                </div>
+                <h1>Welcome Back</h1>
+                <p className="auth-subtitle">Login to SplitNest to manage your expenses</p>
 
-                <br /><br />
+                <form onSubmit={handleLogin}>
+                    <div className="form-group">
+                        <label>Email</label>
+                        <input
+                            type="email"
+                            className="form-control"
+                            placeholder="Enter your email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </div>
 
-                <input
-                    type="password"
-                    placeholder="Password"
-                    onChange={(e) => setPassword(e.target.value)}
-                />
+                    <div className="form-group">
+                        <label>Password</label>
+                        <input
+                            type="password"
+                            className="form-control"
+                            placeholder="Enter your password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </div>
 
-                <br /><br />
+                    <button type="submit" className="btn-primary">
+                        Sign In
+                    </button>
+                </form>
 
-                <button type="submit">
-                    Login
-                </button>
-            </form>
-
-            <p>
-                Don't have an account?
-                <a href="/register"> Register</a>
-            </p>
+                <div className="auth-footer">
+                    <p>
+                        Don't have an account? <a href="/register">Register here</a>
+                    </p>
+                </div>
+            </div>
         </div>
     );
 }
