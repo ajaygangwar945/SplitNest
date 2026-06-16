@@ -316,6 +316,44 @@ a:hover {
   -webkit-text-fill-color: transparent;
 }
 
+.balance-amount {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-left: 1rem;
+}
+
+.balance-users {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.owes-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 10px;
+}
+
+.owes-arrow span {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.owes-arrow svg {
+  width: 20px;
+  height: 20px;
+  color: var(--primary);
+}
+
 @media (min-width: 769px) and (max-width: 1024px) {
   .bento-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -329,6 +367,7 @@ a:hover {
 @media (max-width: 768px) {
   .bento-grid {
     grid-template-columns: 1fr;
+    gap: 0.75rem !important;
   }
   .hide-on-mobile {
     display: none !important;
@@ -337,7 +376,9 @@ a:hover {
     padding: 0 1rem;
   }
   .card {
-    padding: 1.25rem !important;
+    padding: 0.75rem !important;
+    gap: 8px !important;
+    border-radius: 10px !important;
   }
   h1 {
     font-size: 1.6rem !important;
@@ -350,17 +391,54 @@ a:hover {
     font-size: 0.9rem;
   }
   .avatar {
-    width: 32px;
-    height: 32px;
-    font-size: 0.9rem;
+    width: 20px;
+    height: 20px;
+    font-size: 0.6rem;
   }
   .floating-shape {
-    font-size: 2rem !important;
+    font-size: 1.2rem !important;
   }
   .stat-value {
-    font-size: 1.8rem !important;
+    font-size: 1.2rem !important;
   }
   .page-title {
-    font-size: 1.8rem !important;
+    font-size: 1.2rem !important;
+  }
+  .balance-amount {
+    font-size: 0.95rem !important;
+    margin-left: 0 !important;
+    width: auto !important;
+  }
+  .balance-users {
+    gap: 4px !important;
+    justify-content: flex-start !important;
+  }
+  .user-badge {
+    gap: 2px !important;
+    font-size: 0.8rem !important;
+  }
+  .owes-arrow {
+    padding: 0 2px !important;
+  }
+  .owes-arrow span {
+    font-size: 0.5rem !important;
+  }
+  .owes-arrow svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+  body {
+    font-size: 0.8rem;
+  }
+  .card h2, .card h3 {
+    font-size: 0.95rem !important;
+  }
+  .card svg {
+    width: 14px;
+    height: 14px;
+  }
+  .btn-primary, button {
+    font-size: 0.8rem !important;
+    padding: 0.5rem 0.8rem !important;
   }
 }

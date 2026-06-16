@@ -178,8 +178,8 @@ function Balances() {
                 gap: "1rem",
                 animationDelay: `${index * 0.1}s`
               }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <div className="balance-users">
+                  <div className="user-badge">
                     <div className="avatar" style={{ background: "#fee2e2", color: "#991b1b" }}>
                       {(userMap[debt.fromId] || `U${debt.fromId}`).substring(0, 2).toUpperCase()}
                     </div>
@@ -188,12 +188,12 @@ function Balances() {
                     </span>
                   </div>
                   
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "0 10px" }}>
-                    <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: "600" }}>OWES</span>
-                    <ArrowRight size={20} color="var(--primary)" />
+                  <div className="owes-arrow">
+                    <span>OWES</span>
+                    <ArrowRight />
                   </div>
 
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <div className="user-badge">
                     <div className="avatar" style={{ background: "#dcfce7", color: "#166534" }}>
                       {(userMap[debt.toId] || `U${debt.toId}`).substring(0, 2).toUpperCase()}
                     </div>
@@ -202,7 +202,7 @@ function Balances() {
                     </span>
                   </div>
 
-                  <div style={{ fontSize: "1.5rem", fontWeight: "800", color: "var(--text-main)", marginLeft: "1rem" }}>
+                  <div className="balance-amount">
                     ₹{debt.amount.toFixed(2)}
                   </div>
                 </div>
