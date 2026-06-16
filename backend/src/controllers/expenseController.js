@@ -12,6 +12,18 @@ const createExpense = async (req, res) => {
 
     const paid_by = req.user.id;
 
+    // Verify user is a member of the group
+    if (group_id) {
+      const memberCheck = await pool.query(
+        `SELECT * FROM group_members WHERE group_id = $1 AND user_id = $2`,
+        [group_id, paid_by]
+      );
+
+      if (memberCheck.rows.length === 0) {
+        return res.status(403).json({ message: "Access denied. You are not a member of this group." });
+      }
+    }
+
     const result = await pool.query(
       `
       INSERT INTO expenses
@@ -52,9 +64,27 @@ const splitExpense = async (req, res) => {
 
     const { expenseId } = req.params;
     const { splits } = req.body || {};
+    const userId = req.user.id;
 
     if (!splits || !Array.isArray(splits)) {
       return res.status(400).json({ message: "Invalid or missing splits data" });
+    }
+
+    // Verify user is a member of the group this expense belongs to
+    const expenseQuery = await pool.query(`SELECT group_id FROM expenses WHERE id = $1`, [expenseId]);
+    if (expenseQuery.rows.length === 0) {
+      return res.status(404).json({ message: "Expense not found" });
+    }
+    const groupId = expenseQuery.rows[0].group_id;
+
+    if (groupId) {
+      const memberCheck = await pool.query(
+        `SELECT * FROM group_members WHERE group_id = $1 AND user_id = $2`,
+        [groupId, userId]
+      );
+      if (memberCheck.rows.length === 0) {
+        return res.status(403).json({ message: "Access denied. You are not a member of this group." });
+      }
     }
 
     for (const split of splits) {
@@ -94,6 +124,7 @@ const splitExpense = async (req, res) => {
 
 const getBalances = async (req, res) => {
   try {
+    const userId = req.user.id;
 
     const result = await pool.query(`
       SELECT
@@ -103,7 +134,10 @@ const getBalances = async (req, res) => {
       FROM expenses e
       JOIN expense_splits es
       ON e.id = es.expense_id
-    `);
+      WHERE e.group_id IN (
+        SELECT group_id FROM group_members WHERE user_id = $1
+      )
+    `, [userId]);
 
     res.json(result.rows);
 
@@ -121,6 +155,17 @@ const getBalances = async (req, res) => {
 const getGroupExpenses = async (req, res) => {
   try {
     const { groupId } = req.params;
+    const userId = req.user.id;
+
+    // Verify user is a member of the group
+    const memberCheck = await pool.query(
+      `SELECT * FROM group_members WHERE group_id = $1 AND user_id = $2`,
+      [groupId, userId]
+    );
+
+    if (memberCheck.rows.length === 0) {
+      return res.status(403).json({ message: "Access denied. You are not a member of this group." });
+    }
 
     const result = await pool.query(
       `
