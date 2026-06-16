@@ -261,9 +261,28 @@ const confirmImport = async (req, res) => {
       [group_id]
     );
     const members = membersRes.rows;
-    const getUserId = (name) => {
-      const m = members.find(m => m.name === name);
-      return m ? m.id : null;
+    const getUserId = async (name) => {
+      let m = members.find(m => m.name.toLowerCase() === name.toLowerCase());
+      if (m) return m.id;
+      
+      // Auto-create missing user
+      const email = `${name.replace(/\s+/g, '').toLowerCase()}_${Date.now()}@splitnest.local`;
+      try {
+        const uRes = await pool.query(
+          `INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id`,
+          [name, email, 'dummy_hash']
+        );
+        const newId = uRes.rows[0].id;
+        await pool.query(
+          `INSERT INTO group_members (group_id, user_id) VALUES ($1, $2)`,
+          [group_id, newId]
+        );
+        members.push({ id: newId, name });
+        return newId;
+      } catch (e) {
+        console.error("Failed to auto-create user", e);
+        return null;
+      }
     };
 
     let importedExpenses = 0;
@@ -272,14 +291,14 @@ const confirmImport = async (req, res) => {
     for (const row of rows) {
       if (row.skip) continue;
 
-      const payerId = getUserId(row.proposed.paid_by);
-      if (!payerId) continue; // Can't map payer
+      const payerId = await getUserId(row.proposed.paid_by);
+      if (!payerId) {
+        console.log("Skipping row, payer not found/created", row.proposed.paid_by);
+        continue;
+      }
 
       if (row.proposed.is_settlement) {
-        // Settlement: from split_with to paid_by
-        // E.g. "Rohan paid Aisha back", paid_by="Rohan", split_with="Aisha"
-        // Wait, if Rohan paid Aisha, Rohan is the payer. Aisha is the receiver.
-        const receiverId = getUserId(row.proposed.split_with);
+        const receiverId = await getUserId(row.proposed.split_with);
         if (receiverId) {
           await pool.query(
             `INSERT INTO settlements (group_id, paid_by, paid_to, amount, settled_at) VALUES ($1, $2, $3, $4, $5)`,
@@ -302,8 +321,6 @@ const confirmImport = async (req, res) => {
           let splitValue = parseFloat(row.proposed.amount) / numPeople;
           
           if (row.proposed.split_type === "percentage" && row.proposed.split_details) {
-            // E.g. "Aisha 30%; Rohan 30%; Priya 30%; Meera 20%"
-            // We already renormalized it conceptually, let's parse it precisely
             const details = row.proposed.split_details.split(";").map(s => s.trim());
             const parsedDetails = details.map(d => {
               const parts = d.split(" ");
@@ -314,7 +331,7 @@ const confirmImport = async (req, res) => {
             const totalPct = parsedDetails.reduce((sum, p) => sum + p.pct, 0);
 
             for (const p of parsedDetails) {
-              const uId = getUserId(p.name);
+              const uId = await getUserId(p.name);
               if (uId) {
                 const amount = (parseFloat(row.proposed.amount) * (p.pct / totalPct)).toFixed(2);
                 await pool.query(`INSERT INTO expense_splits (expense_id, user_id, split_amount) VALUES ($1, $2, $3)`, [expId, uId, amount]);
@@ -325,7 +342,6 @@ const confirmImport = async (req, res) => {
           } 
           
           if (row.proposed.split_type === "share" && row.proposed.split_details) {
-            // E.g. "Aisha 1; Rohan 2; Priya 1; Dev 2"
             const details = row.proposed.split_details.split(";").map(s => s.trim());
             const parsedDetails = details.map(d => {
               const parts = d.split(" ");
@@ -336,7 +352,7 @@ const confirmImport = async (req, res) => {
             const totalShares = parsedDetails.reduce((sum, p) => sum + p.share, 0);
 
             for (const p of parsedDetails) {
-              const uId = getUserId(p.name);
+              const uId = await getUserId(p.name);
               if (uId) {
                 const amount = (parseFloat(row.proposed.amount) * (p.share / totalShares)).toFixed(2);
                 await pool.query(`INSERT INTO expense_splits (expense_id, user_id, split_amount) VALUES ($1, $2, $3)`, [expId, uId, amount]);
@@ -347,13 +363,12 @@ const confirmImport = async (req, res) => {
           }
           
           if (row.proposed.split_type === "unequal" && row.proposed.split_details) {
-             // E.g. "Rohan 700; Priya 400; Meera 400"
              const details = row.proposed.split_details.split(";").map(s => s.trim());
              for (const d of details) {
                const parts = d.split(" ");
                const name = parts[0];
                const amt = parseFloat(parts[parts.length - 1]);
-               const uId = getUserId(name);
+               const uId = await getUserId(name);
                if (uId) {
                  await pool.query(`INSERT INTO expense_splits (expense_id, user_id, split_amount) VALUES ($1, $2, $3)`, [expId, uId, amt]);
                }
@@ -364,7 +379,7 @@ const confirmImport = async (req, res) => {
 
           // Default Equal
           for (const name of splitWith) {
-            const uId = getUserId(name);
+            const uId = await getUserId(name);
             if (uId) {
               await pool.query(`INSERT INTO expense_splits (expense_id, user_id, split_amount) VALUES ($1, $2, $3)`, [expId, uId, splitValue.toFixed(2)]);
             }
