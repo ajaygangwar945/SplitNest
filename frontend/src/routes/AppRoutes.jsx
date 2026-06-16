@@ -8,6 +8,7 @@ import Groups from "../pages/Groups";
 import GroupDetails from "../pages/GroupDetails";
 import Expenses from "../pages/Expenses";
 import Balances from "../pages/Balances";
+import ImportCsv from "../pages/ImportCsv";
 import ProtectedRoute from "../components/ProtectedRoute";
 
 function AppRoutes() {

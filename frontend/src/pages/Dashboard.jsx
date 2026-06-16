@@ -136,6 +136,7 @@ function Dashboard() {
         <button className="btn-primary" style={{ flex: "1 1 200px" }} onClick={() => navigate("/groups")}>Manage Groups</button>
         <button className="btn-primary" style={{ flex: "1 1 200px" }} onClick={() => navigate("/expenses")}>View Expenses</button>
         <button className="btn-primary" style={{ flex: "1 1 200px", background: "var(--secondary)" }} onClick={() => navigate("/balances")}>Settle Balances</button>
+        <button className="btn-primary" style={{ flex: "1 1 200px", background: "#10b981" }} onClick={() => navigate("/import")}>Import CSV</button>
       </div>
     </div>
   );
