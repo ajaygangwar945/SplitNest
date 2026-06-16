@@ -22,6 +22,8 @@ router.get("/settlements", getSettlementReport);
  *     summary: Dashboard Statistics
  *     tags:
  *       - Reports
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Dashboard data

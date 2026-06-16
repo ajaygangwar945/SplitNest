@@ -18,7 +18,7 @@ const analyzeCSV = async (req, res) => {
     }
 
     const membersRes = await pool.query(
-      `SELECT u.id, u.name, gm.left_at 
+      `SELECT u.id, u.name, gm.joined_at, gm.left_at 
        FROM users u 
        JOIN group_members gm ON u.id = gm.user_id 
        WHERE gm.group_id = $1`,
@@ -125,11 +125,19 @@ const analyzeCSV = async (req, res) => {
               }
             }
 
-            // --- 5. Missing Currency ---
+            // --- 5. Missing Currency / USD Conversion ---
             if (!row.currency || row.currency.trim() === "") {
               issues.push("Missing currency, defaulted to INR");
               status = "Warning";
               proposed.currency = "INR";
+            } else if (row.currency.trim().toUpperCase() === "USD") {
+              const usdAmount = parseFloat(proposed.amount);
+              if (!isNaN(usdAmount)) {
+                proposed.amount = (usdAmount * 83).toFixed(2);
+                proposed.currency = "INR";
+                issues.push(`Converted USD to INR at rate 83 (Original: $${usdAmount})`);
+                status = "Warning";
+              }
             }
 
             // --- 6. Negative Amounts ---
@@ -184,7 +192,7 @@ const analyzeCSV = async (req, res) => {
               proposed.is_settlement = true;
             }
 
-            // --- 14. Member left but still included ---
+            // --- 14. Member joined after/left before ---
             if (proposed.date && proposed.split_with) {
               const expDate = new Date(proposed.date);
               const splitList = proposed.split_with.split(";");
@@ -192,16 +200,21 @@ const analyzeCSV = async (req, res) => {
               
               splitList.forEach(name => {
                 const member = members.find(m => m.name === name);
-                if (member && member.left_at) {
-                  const leftDate = new Date(member.left_at);
-                  if (expDate > leftDate) {
+                if (member) {
+                  const joinDate = member.joined_at ? new Date(member.joined_at) : null;
+                  const leftDate = member.left_at ? new Date(member.left_at) : null;
+
+                  if (leftDate && expDate > leftDate) {
                     issues.push(`Member '${name}' had already left the group. Removed from split.`);
+                    status = "Warning";
+                  } else if (joinDate && expDate < joinDate) {
+                    issues.push(`Member '${name}' had not yet joined the group. Removed from split.`);
                     status = "Warning";
                   } else {
                     validSplits.push(name);
                   }
                 } else {
-                  validSplits.push(name);
+                  validSplits.push(name); // Auto-created user will join at current timestamp later
                 }
               });
               if (validSplits.length !== splitList.length) {
@@ -253,6 +266,8 @@ const analyzeCSV = async (req, res) => {
                 else if (issue.includes("duplicate")) anomalyType = "DUPLICATE_EXPENSE";
                 else if (issue.includes("Missing 'paid_by'")) anomalyType = "MISSING_PAYER";
                 else if (issue.includes("settlement")) anomalyType = "MISLABELED_SETTLEMENT";
+                else if (issue.includes("Converted USD")) anomalyType = "CURRENCY_CONVERSION";
+                else if (issue.includes("already left") || issue.includes("not yet joined")) anomalyType = "INVALID_MEMBER_DATE";
                 
                 try {
                   await pool.query(

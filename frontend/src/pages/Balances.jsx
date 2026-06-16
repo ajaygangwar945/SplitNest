@@ -107,6 +107,24 @@ function Balances() {
     fetchData();
   }, []);
 
+  const [selectedDebt, setSelectedDebt] = useState(null);
+  const [debtDetails, setDebtDetails] = useState([]);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+
+  const handleViewDetails = async (debt) => {
+    setSelectedDebt(debt);
+    setLoadingDetails(true);
+    try {
+      const res = await api.get(`/expenses/between/${debt.fromId}/${debt.toId}`);
+      setDebtDetails(res.data);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load details");
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
   const handleSettleUp = async (debt) => {
     if (!window.confirm(`Confirm settlement of ₹${debt.amount.toFixed(2)}?`)) return;
 
@@ -156,18 +174,60 @@ function Balances() {
                   ₹{debt.amount.toFixed(2)}
                 </span>
               </div>
-              <button 
-                className="btn-primary" 
-                style={{ width: "auto", padding: "8px 16px", background: "#10b981" }}
-                onClick={() => handleSettleUp(debt)}
-                disabled={settling}
-              >
-                {settling ? "Processing..." : "Settle Up"}
-              </button>
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button 
+                  style={{ width: "auto", padding: "8px 16px", borderRadius: "6px", border: "1px solid var(--border-color)", cursor: "pointer", background: "transparent" }}
+                  onClick={() => handleViewDetails(debt)}
+                >
+                  View Details
+                </button>
+                <button 
+                  className="btn-primary" 
+                  style={{ width: "auto", padding: "8px 16px", background: "#10b981" }}
+                  onClick={() => handleSettleUp(debt)}
+                  disabled={settling}
+                >
+                  {settling ? "Processing..." : "Settle Up"}
+                </button>
+              </div>
             </div>
           ))
         )}
       </div>
+
+      {selectedDebt && (
+        <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", background: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 }}>
+          <div style={{ background: "var(--card-bg)", padding: "20px", borderRadius: "8px", width: "90%", maxWidth: "600px", maxHeight: "80vh", overflowY: "auto" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border-color)", paddingBottom: "10px", marginBottom: "15px" }}>
+              <h2>Transaction Details</h2>
+              <button onClick={() => setSelectedDebt(null)} style={{ background: "transparent", border: "none", fontSize: "1.5rem", cursor: "pointer" }}>×</button>
+            </div>
+            
+            <p>Raw transactions between <b>{userMap[selectedDebt.fromId]}</b> and <b>{userMap[selectedDebt.toId]}</b>:</p>
+            
+            {loadingDetails ? (
+              <p>Loading transactions...</p>
+            ) : debtDetails.length === 0 ? (
+              <p>No direct transactions found. This debt may be the result of multi-party debt simplification.</p>
+            ) : (
+              <ul style={{ listStyle: "none", padding: 0 }}>
+                {debtDetails.map(txn => (
+                  <li key={txn.id} style={{ padding: "10px", borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between" }}>
+                    <div>
+                      <strong>{txn.title}</strong><br/>
+                      <small style={{ color: "#666" }}>{new Date(txn.expense_date).toLocaleDateString()} • Paid by {txn.paid_by_name}</small>
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <span style={{ fontWeight: "bold" }}>₹{txn.split_amount}</span><br/>
+                      <small>Total: ₹{txn.total_amount}</small>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

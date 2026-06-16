@@ -13,10 +13,8 @@ const authRoutes = require("./routes/authRoutes");
 const groupRoutes = require("./routes/groupRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
 const settlementRoutes = require("./routes/settlementRoutes");
-const dashboardRoutes = require("./routes/dashboardRoutes");
 const importRoutes = require("./routes/importRoutes");
 const reportRoutes = require("./routes/reportRoutes");
-const balanceRoutes = require("./routes/balanceRoutes");
 
 
 app.use("/api/users", userRoutes);
@@ -24,10 +22,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/groups", groupRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/settlements", settlementRoutes);
-app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/import", importRoutes);
 app.use("/api/reports", reportRoutes);
-app.use("/api/balances", balanceRoutes);
 
 
 

@@ -186,9 +186,36 @@ const getGroupExpenses = async (req, res) => {
   }
 };
 
+const getExpensesBetweenUsers = async (req, res) => {
+  try {
+    const { user1, user2 } = req.params;
+
+    const result = await pool.query(
+      `
+      SELECT e.id, e.title, e.amount as total_amount, e.expense_date, e.paid_by,
+             payer.name as paid_by_name,
+             es.split_amount, es.user_id as split_user_id
+      FROM expenses e
+      JOIN expense_splits es ON e.id = es.expense_id
+      JOIN users payer ON e.paid_by = payer.id
+      WHERE (e.paid_by = $1 AND es.user_id = $2)
+         OR (e.paid_by = $2 AND es.user_id = $1)
+      ORDER BY e.expense_date DESC
+      `,
+      [user1, user2]
+    );
+
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 module.exports = {
   createExpense,
   splitExpense,
   getBalances,
-  getGroupExpenses
+  getGroupExpenses,
+  getExpensesBetweenUsers
 };
