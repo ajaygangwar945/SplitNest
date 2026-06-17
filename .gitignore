@@ -1,26 +1,3 @@
-# Node
-node_modules/
-
-# Environment
-.env
-
-# Uploads
-backend/uploads/*
-
-# Logs
-*.log
-
-# Build files
-dist/
-build/
-
-# VS Code
-.vscode/
-
-# OS
-.DS_Store
-Thumbs.db
-
 # Logs
 logs
 *.log
@@ -30,16 +7,28 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Node
+node_modules/
+
+# Environment
+.env
+.env.*
+
+# Uploads
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Build files
+dist/
+build/
+dist-ssr/
 *.local
 
 # Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+.vscode/
+.idea/
 .DS_Store
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj

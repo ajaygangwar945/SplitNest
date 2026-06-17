@@ -32,8 +32,8 @@ function Navbar() {
         boxShadow: "var(--shadow-sm)",
         marginBottom: "2rem"
       }}>
-        <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "var(--primary)", display: "flex", alignItems: "center", gap: "10px" }}>
-          <img src="/favicon.png" alt="SplitNest Logo" style={{ width: "32px", height: "32px", borderRadius: "8px" }} />
+        <div className="nav-logo">
+          <img src="/favicon.png" alt="SplitNest Logo" />
           SplitNest
         </div>
         
@@ -79,7 +79,7 @@ function Navbar() {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             style={{ background: "transparent", border: "none", color: "var(--text-main)", cursor: "pointer" }}
           >
-            {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </nav>
@@ -97,11 +97,7 @@ function Navbar() {
               key={link.path} 
               to={link.path} 
               onClick={() => setMobileMenuOpen(false)}
-              style={{ 
-                textDecoration: "none", color: "var(--text-main)", fontSize: "1.2rem",
-                padding: "1rem 0", borderBottom: "1px solid var(--border-color)",
-                display: "flex", alignItems: "center", gap: "15px"
-              }}
+              className="mobile-menu-link"
             >
               {link.icon} {link.name}
             </Link>

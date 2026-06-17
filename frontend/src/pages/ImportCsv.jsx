@@ -166,7 +166,7 @@ function ImportCsv() {
               </h2>
               <p style={{ margin: "4px 0 0 0", color: "var(--text-muted)" }}>Please review the anomalies below before confirming.</p>
             </div>
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div className="import-review-actions">
               <button 
                 onClick={() => { setReport(null); setFile(null); }} 
                 style={{ padding: "10px 20px", borderRadius: "8px", border: "1px solid var(--border-color)", background: "white", cursor: "pointer", fontWeight: "600" }}

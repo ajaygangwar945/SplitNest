@@ -86,11 +86,11 @@ function GroupDetails() {
 
       <div className="card" style={{ padding: "24px", marginBottom: "2rem", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          <div style={{ padding: "16px", background: "linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)", color: "white", borderRadius: "16px" }}>
-            <Users size={32} />
+          <div className="group-header-icon">
+            <Users />
           </div>
           <div>
-            <h1 style={{ margin: 0, fontSize: "2rem" }}>{group ? group.group_name : "Loading..."}</h1>
+            <h1 className="group-header-title">{group ? group.group_name : "Loading..."}</h1>
             <p style={{ margin: "4px 0 0 0", color: "var(--text-muted)" }}>{members.length} members</p>
           </div>
         </div>
